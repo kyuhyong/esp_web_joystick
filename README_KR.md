@@ -102,7 +102,7 @@ ESP32 모듈에 할당된 IP를 모르는 경우 다음을 수행하여 AP 모�
 
 1. 로봇을 켭니다.  
 
-2. <a name="B2"></a>**D1** 버튼을 누른 후 ESP32 **내장LED** 가 켜질때까지 기다립니다.  
+2. <a name="B2"></a>**D1** 버튼을 약 3초간 누른 후 ESP32 **내장LED** 가 켜질때까지 기다립니다.  
     <div align="center">
       <img src="images/esp_onboard_led.jpg" width="400"/>
     </div>

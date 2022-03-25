@@ -20,6 +20,7 @@
 #include <SoftwareSerial.h>
 #include <FS.h>
 #include <ArduinoJson.h>
+#include "pushButton.h"
 
 #define LED_ONBOARD_ON     digitalWrite(PIN_LED_ONBOARD, LOW)
 #define LED_ONBOARD_OFF    digitalWrite(PIN_LED_ONBOARD, HIGH)
@@ -37,8 +38,7 @@ bool              ledState = false;
 unsigned long     status_led_last_millis = 0; 
 // Input button Pins ------------------------------------------
 const int         PIN_INPUT_BTN = D1;           // Input pin GPIO5
-bool              btn_state =             false;
-unsigned long     btn_pressed_millis =    0;
+PUSH_BUTTON       push_button(PIN_INPUT_BTN, INPUT_PULLUP);
 
 /// Set Wifi ssid and password ----------------------------------
 IPAddress         local_ip;       // Local IP address assigned by Router
@@ -171,29 +171,14 @@ void run_AP_config(void) {
    start_server();
    is_AP_mode_set = false;
 }
-/**
- * @brief 
- * 
- */
-void buttonHandler_loop(void) {
-   if(!btn_state) {
-      if(!digitalRead(PIN_INPUT_BTN)) {
-         btn_pressed_millis = millis();
-         btn_state = true;
-      }
-   } else {
-      int btn_pressing_time = millis() - btn_pressed_millis;    //Check time delay after pressing button
-      if(digitalRead(PIN_INPUT_BTN)) {    // Button is released
-         //Serial.printf("BTN press time: %d\r\n", btn_pressing_time);
-         btn_state = false;
-      } else {    //While pressing the button
-         if(btn_pressing_time > 3000) {    // Long pressing button detected
-         //Put device into AP configuration mode
-         LED_ONBOARD_ON;
-         is_AP_mode_set = true;
-         run_AP_config();
-         }
-      }
+
+void new_pushButtonEvent(BUTTON_PRESS press)
+{
+   if(press == SHORT_PRESS) {
+      Serial.println("Short Button Pressed!");
+   } else if(press == LONG_PRESS) {
+      Serial.println("Long Button Pressed!");
+      run_AP_config();
    }
 }
 
@@ -204,7 +189,8 @@ void setup() {
    /// Initialize the output variables as outputs
    pinMode(PIN_LED_STATUS,   OUTPUT);
    pinMode(PIN_LED_ONBOARD,  OUTPUT);
-   pinMode(PIN_INPUT_BTN,    INPUT);
+   //pinMode(PIN_INPUT_BTN,    INPUT);
+   push_button.onNewPushButtonEvent(new_pushButtonEvent);
    LED_ONBOARD_ON;
    Serial.println("\nStarting R1mini esp remote");
    Serial.println("Scanning networks...");
@@ -264,5 +250,6 @@ void loop() {
   }
   server.handleClient();
   webSocket.loop();
-  buttonHandler_loop();
+  push_button.update();
+  //buttonHandler_loop();
 }
